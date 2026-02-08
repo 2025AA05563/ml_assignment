@@ -19,14 +19,14 @@ from model.models_training import train_model
 # ------------------------------------------------------------
 # Maps dropdown option → corresponding training function
 
-MODEL_MAP = {
-    "Logistic Regression": logistic_model,
-    "Decision Tree": decision_tree_model,
-    "K-Nearest Neighbors (KNN)": knn_model,
-    "Naive Bayes": naive_bayes_model,
-    "Random Forest (Ensemble)": random_forest_model,
-    "XGBoost (Ensemble)": xgboost_model
-}
+MODEL_NAMES = [
+    "Logistic Regression",
+    "Decision Tree",
+    "KNN",
+    "Naive Bayes",
+    "Random Forest",
+    "XGBoost"
+]
 
 
 # ------------------------------------------------------------
@@ -65,10 +65,7 @@ target_column = st.text_input(
 )
 
 # 🤖 Model selection dropdown
-model_name = st.selectbox(
-    "🤖 Select Classification Model",
-    list(MODEL_MAP.keys())
-)
+model_name = st.selectbox("Select Model", MODEL_NAMES)
 
 
 # ------------------------------------------------------------
@@ -103,11 +100,7 @@ if uploaded_file is not None and target_column != "":
     # --------------------------------------------------------
     st.subheader("🏋️ Model Training")
 
-    # Get the selected model function
-    train_function = MODEL_MAP[model_name]
-
-    # Train model
-    model = train_function(X_train, y_train)
+    model = train_model(model_name, X_train, y_train)
 
     st.success(f"✅ {model_name} trained successfully!")
 
