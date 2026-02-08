@@ -20,106 +20,125 @@ from model.naive_bayes import train_model as naive_bayes_model
 from model.random_forest import train_model as random_forest_model
 from model.xgboost_model import train_model as xgboost_model
 
-# --------------------------------------------------------
-# Mapping model names (UI) to training functions
-# --------------------------------------------------------
+# ------------------------------------------------------------
+# 🧠 3. MODEL SELECTION MAPPING
+# ------------------------------------------------------------
+# Maps dropdown option → corresponding training function
+
 MODEL_MAP = {
     "Logistic Regression": logistic_model,
     "Decision Tree": decision_tree_model,
-    "K-Nearest Neighbors": knn_model,
+    "K-Nearest Neighbors (KNN)": knn_model,
     "Naive Bayes": naive_bayes_model,
     "Random Forest (Ensemble)": random_forest_model,
     "XGBoost (Ensemble)": xgboost_model
 }
 
-# --------------------------------------------------------
-# Streamlit Page Title
-# --------------------------------------------------------
-st.title("Machine Learning Assignment – Classification Models")
 
-st.write(
+# ------------------------------------------------------------
+# 🖥️ 4. STREAMLIT PAGE HEADER
+# ------------------------------------------------------------
+
+st.title("📊 Machine Learning Assignment – Classification Models")
+
+st.markdown(
     """
-    This application allows you to upload a dataset, select a machine learning classification model and evaluate its performance using multiple metrics.
+    🔹 Upload a CSV dataset  
+    🔹 Select a machine learning model  
+    🔹 Evaluate performance using multiple metrics  
+    🔹 Visualize results using a confusion matrix  
     """
 )
 
-# --------------------------------------------------------
-# Dataset Upload Section
-# --------------------------------------------------------
+
+# ------------------------------------------------------------
+# 📂 5. USER INPUT SECTION
+# ------------------------------------------------------------
+
+# 📁 Dataset upload
 uploaded_file = st.file_uploader(
-    "Upload Dataset (Test Data Only)",
+    "📁 Upload CSV Dataset (Test Data Only)",
     type=["csv"]
 )
 
-# Target column input
+# 🎯 Target column name input
 target_column = st.text_input(
-    "Enter the Target Column Name (exactly as in CSV)"
+    "🎯 Enter Target Column Name (exactly as in CSV)"
 )
 
-# Model selection dropdown
+# 🤖 Model selection dropdown
 model_name = st.selectbox(
-    "Select Classification Model",
+    "🤖 Select Classification Model",
     list(MODEL_MAP.keys())
 )
 
-# --------------------------------------------------------
-# Main Logic: Execute only when inputs are provided
-# --------------------------------------------------------
+
+# ------------------------------------------------------------
+# ▶️ 6. MAIN APPLICATION LOGIC
+# ------------------------------------------------------------
+
+# Proceed only if dataset and target column are provided
 if uploaded_file is not None and target_column != "":
 
-    # Load and display dataset
+    # --------------------------------------------------------
+    # 👀 Dataset Preview
+    # --------------------------------------------------------
     df = pd.read_csv(uploaded_file)
-    st.subheader("Uploaded Dataset Preview")
+
+    st.subheader("📄 Dataset Preview")
     st.dataframe(df.head())
 
-    # ----------------------------------------------------
-    # Data Preprocessing
-    # ----------------------------------------------------
+    # --------------------------------------------------------
+    # ⚙️ Data Preprocessing
+    # --------------------------------------------------------
     try:
         X_train, X_test, y_train, y_test = load_and_preprocess(
             uploaded_file,
             target_column
         )
-    except Exception as e:
-        st.error("Error in preprocessing. Check target column name.")
+    except Exception:
+        st.error("❌ Error during preprocessing. Please check target column name.")
         st.stop()
 
-    # ----------------------------------------------------
-    # Model Training
-    # ----------------------------------------------------
-    st.subheader("Model Training")
+    # --------------------------------------------------------
+    # 🏋️ Model Training
+    # --------------------------------------------------------
+    st.subheader("🏋️ Model Training")
 
-    model_train_function = MODEL_MAP[model_name]
-    model = model_train_function(X_train, y_train)
+    # Get the selected model function
+    train_function = MODEL_MAP[model_name]
 
-    st.success(f"{model_name} trained successfully!")
+    # Train model
+    model = train_function(X_train, y_train)
 
-    # ----------------------------------------------------
-    # Prediction
-    # ----------------------------------------------------
+    st.success(f"✅ {model_name} trained successfully!")
+
+    # --------------------------------------------------------
+    # 🔮 Model Prediction
+    # --------------------------------------------------------
     y_pred = model.predict(X_test)
 
-    # Check if model supports probability prediction
+    # Check for probability prediction (needed for AUC)
     if hasattr(model, "predict_proba"):
         y_prob = model.predict_proba(X_test)
     else:
         y_prob = None
 
-    # ----------------------------------------------------
-    # Evaluation Metrics
-    # ----------------------------------------------------
-    st.subheader("Evaluation Metrics")
+    # --------------------------------------------------------
+    # 📊 Evaluation Metrics
+    # --------------------------------------------------------
+    st.subheader("📊 Evaluation Metrics")
 
     metrics = evaluate_model(y_test, y_pred, y_prob)
 
-    # Display metrics neatly
-    for metric_name, metric_value in metrics.items():
-        st.write(f"**{metric_name}:** {metric_value}")
+    # Display metrics clearly
+    for metric, value in metrics.items():
+        st.write(f"🔹 **{metric}:** {value}")
 
-    # ----------------------------------------------------
-    # Confusion Matrix
-    # ----------------------------------------------------
-    st.subheader("Confusion Matrix")
+    # --------------------------------------------------------
+    # 🔢 Confusion Matrix Visualization
+    # --------------------------------------------------------
+    st.subheader("🔢 Confusion Matrix")
 
     cm = confusion_matrix(y_test, y_pred)
 
@@ -128,4 +147,7 @@ if uploaded_file is not None and target_column != "":
     st.pyplot(fig)
 
 else:
-    st.info("Please upload a CSV file and enter the target column name.")
+    # --------------------------------------------------------
+    # ℹ️ User Guidance Message
+    # --------------------------------------------------------
+    st.info("⬆️ Please upload a CSV file and enter the target column name to continue.")
