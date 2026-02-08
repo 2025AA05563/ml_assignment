@@ -8,8 +8,8 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, StandardScaler, OneHotEncoder
 from sklearn.model_selection import train_test_split
 
-def data_load_preprocess():
-  train_DataSet = pd.read_csv("ML_Assignment_2.csv")
+def data_load_preprocess(csv_file):
+  train_DataSet = pd.read_csv(csv_file)  #"ML_Assignment_2.csv")
   
   #Check for any invalid data for Categorical values
   print("\n\n#########################################################")
