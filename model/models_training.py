@@ -5,44 +5,75 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 
-def modeltraining(model):
-  
-def train_model(X_train, y_train):
-    model = LogisticRegression(max_iter=1000)
+def train_model(model_name, X_train, y_train):
+    """
+    Trains and returns a machine learning model based on model_name.
+
+    Parameters:
+    ----------
+    model_name : str
+        Name of the model selected by user
+    X_train : array-like
+        Training features
+    y_train : array-like
+        Training labels
+
+    Returns:
+    -------
+    model : trained ML model
+    """
+
+    # --------------------------------------------------------
+    # Logistic Regression
+    # --------------------------------------------------------
+    if model_name == "Logistic Regression":
+        model = LogisticRegression(max_iter=1000)
+
+    # --------------------------------------------------------
+    # Decision Tree Classifier
+    # --------------------------------------------------------
+    elif model_name == "Decision Tree":
+        model = DecisionTreeClassifier(random_state=42)
+
+    # --------------------------------------------------------
+    # K-Nearest Neighbors
+    # --------------------------------------------------------
+    elif model_name == "KNN":
+        model = KNeighborsClassifier(n_neighbors=5)
+
+    # --------------------------------------------------------
+    # Naive Bayes (Gaussian)
+    # --------------------------------------------------------
+    elif model_name == "Naive Bayes":
+        model = GaussianNB()
+
+    # --------------------------------------------------------
+    # Random Forest (Ensemble)
+    # --------------------------------------------------------
+    elif model_name == "Random Forest":
+        model = RandomForestClassifier(
+            n_estimators=100,
+            random_state=42
+        )
+
+    # --------------------------------------------------------
+    # XGBoost (Ensemble)
+    # --------------------------------------------------------
+    elif model_name == "XGBoost":
+        model = XGBClassifier(
+            use_label_encoder=False,
+            eval_metric="logloss"
+        )
+
+    # --------------------------------------------------------
+    # Invalid Model Name
+    # --------------------------------------------------------
+    else:
+        raise ValueError("Invalid model name selected")
+
+    # --------------------------------------------------------
+    # Train the selected model
+    # --------------------------------------------------------
     model.fit(X_train, y_train)
-    return model
 
-
-def train_model(X_train, y_train):
-    model = DecisionTreeClassifier(random_state=42)
-    model.fit(X_train, y_train)
-    return model
-
-
-
-def train_model(X_train, y_train):
-    model = KNeighborsClassifier(n_neighbors=5)
-    model.fit(X_train, y_train)
-    return model
-
-
-def train_model(X_train, y_train):
-    model = GaussianNB()
-    model.fit(X_train, y_train)
-    return model
-
-
-def train_model(X_train, y_train):
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X_train, y_train)
-    return model
-
-
-
-def train_model(X_train, y_train):
-    model = XGBClassifier(
-        eval_metric="logloss",
-        use_label_encoder=False
-    )
-    model.fit(X_train, y_train)
     return model
