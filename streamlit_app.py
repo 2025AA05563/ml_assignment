@@ -1,5 +1,5 @@
 # Importing Streamlit (used to create web UI)
-import streamlit as st
+import streamlit as st    # Streamlit UI framework
 
 # Import core libraries
 import pandas as pd
@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 # Import our own helper functions
-from model.data_creation import data_load_and_preprocess
-from model.metrics import evaluate_model
+from model.data_creation import data_load_preprocess
+from model.model_evaluation import evaluate_model
 
 # Import training functions for all models
 from model.logistic_regression import train_model as logistic_model
