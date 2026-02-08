@@ -11,14 +11,8 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 # Import our own helper functions
 from model.data_creation import data_load_preprocess
 from model.model_evaluation import evaluate_model
+from model.models_training import train_model
 
-# Import training functions for all models
-from model.logistic_regression import train_model as logistic_model
-from model.decision_tree import train_model as decision_tree_model
-from model.knn import train_model as knn_model
-from model.naive_bayes import train_model as naive_bayes_model
-from model.random_forest import train_model as random_forest_model
-from model.xgboost_model import train_model as xgboost_model
 
 # ------------------------------------------------------------
 # 🧠 3. MODEL SELECTION MAPPING
@@ -39,7 +33,11 @@ MODEL_MAP = {
 # 🖥️ 4. STREAMLIT PAGE HEADER
 # ------------------------------------------------------------
 
-st.title("📊 Machine Learning Assignment – Classification Models")
+st.set_page_config(
+    page_title="📊 Machine Learning Assignment – Classification Models",
+    layout="centered"
+)
+#st.title("📊 Machine Learning Assignment – Classification Models")
 
 st.markdown(
     """
