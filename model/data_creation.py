@@ -15,6 +15,7 @@ def data_load_preprocess(csv_file):
   print("\n\n#########################################################")
   print("-----------## Checking Invalida data (Training Data Set) ##----------")
   print("#########################################################")
+
   for column in train_DataSet.columns:
     if(train_DataSet[column].dtype == 'object'):
       # Replace '?' with mode for a specific column
@@ -22,28 +23,33 @@ def data_load_preprocess(csv_file):
       train_DataSet[column] = train_DataSet[column].replace(' ?', mode_value)
       #z Feature Scaling : Encode categorical variables 
   
+  # Remove whitespace
+  train_DataSet["income"] = train_DataSet["income"].str.strip()
+  # Remove trailing period (.)
+  train_DataSet["income"] = train_DataSet["income"].str.replace(".", "", regex=False)
+
   ## Since multipl features are Ordinal values converting them to numerical values by using Label encoding
   target_encoder = LabelEncoder()  
-  train_DataSet['Salary'] = target_encoder.fit_transform(train_DataSet['Salary'])
+  train_DataSet['income'] = target_encoder.fit_transform(train_DataSet['income'])
 
   #Feature selection
   #Removing Duplicate features (education)
   # Droping actual original category columns
   # Seperating the features (x) and traget(y)
-  X = train_DataSet.drop(['Salary', 'education-num'], axis=1)    #['WorkClass', 'marital-status', 'occupation', 'relationship','race','sex','native-country', 'education', 'Salary', 'Salary_encoded'], axis=1)
-  y = train_DataSet['Salary']
+  X = train_DataSet.drop(['income', 'education-num'], axis=1)    #['WorkClass', 'marital-status', 'occupation', 'relationship','race','sex','native-country', 'education', 'Salary', 'Salary_encoded'], axis=1)
+  y = train_DataSet['income']
 
   print("Training Data:\n", X)
   print("Training output:\n", y)
 
   #Since features are at different scale using Min Max scaler
-  numerical_columns = ['Age', 'fnlwgt', 'capital-gain', 'capital-loss', 'hours-per-week']
+  numerical_columns = ['age', 'fnlwgt', 'capital-gain', 'capital-loss', 'hours-per-week']
   scaler_minmax = MinMaxScaler()
   X[numerical_columns] = scaler_minmax.fit_transform(X[numerical_columns])
 
   #Performing one-Hot encoding for Categorical values
   #X = pd.get_dummies(X, columns=['workclass_encoded', 'marital-status_encoded', 'occupation_encoded', 'relationship_encoded','race_encoded','sex_encoded','native-country_encoded'])
-  X = pd.get_dummies(X, columns=['WorkClass', 'marital-status', 'occupation', 'relationship','race','sex','native-country', 'education'])
+  X = pd.get_dummies(X, columns=['workclass', 'marital-status', 'occupation', 'relationship','race','sex','native-country', 'education'])
   #print("Dummies:\n", X.columns)
   
   # Split data into training and validation sets (80% train, 20% validation)
