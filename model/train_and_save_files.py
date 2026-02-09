@@ -13,36 +13,24 @@ import os
 import pickle
 
 # Import project modules
-from model.data_utils import load_dataset_from_url, prepare_data
-from model.models import train_model
-from model.metrics import evaluate_model
+from data_creation import data_load_preprocess
+from models_training import train_model
+from model_evaluation import evaluate_model
 
 
 # ------------------------------------------------------------
 # 📌 Dataset configuration
 # ------------------------------------------------------------
-DATA_URL = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/winequality-white.csv"
-TARGET_COLUMN = "quality"
-
-
-# ------------------------------------------------------------
-# 📌 Create folder to store saved models
-# ------------------------------------------------------------
-ARTIFACTS_DIR = "artifacts"
-os.makedirs(ARTIFACTS_DIR, exist_ok=True)
-
-
-# ------------------------------------------------------------
-# 📌 Load and preprocess dataset
-# ------------------------------------------------------------
 print("Loading dataset...")
-df = load_dataset_from_url(DATA_URL)
+csv_file = "ML_Assignment_2.csv"
+X_train, X_test, y_train, y_test = data_load_preprocess(csv_file)
 
 print("Preparing data...")
-X_train, X_test, y_train, y_test, scaler, label_encoder = prepare_data(
-    df,
-    TARGET_COLUMN
-)
+#X_train, X_test, y_train, y_test, scaler, label_encoder = data_load_preprocess(
+#    df,
+#    TARGET_COLUMN
+#)
+
 
 
 # ------------------------------------------------------------
