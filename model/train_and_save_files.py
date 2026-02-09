@@ -17,15 +17,21 @@ from data_creation import data_load_preprocess
 from models_training import train_model
 from model_evaluation import evaluate_model
 
+# ------------------------------------------------------------
+# 📌 Create folder to store saved models
+# ------------------------------------------------------------
+ARTIFACTS_DIR = "pkl_files"
+os.makedirs(ARTIFACTS_DIR, exist_ok=True)
 
 # ------------------------------------------------------------
 # 📌 Dataset configuration
 # ------------------------------------------------------------
 print("Loading dataset...")
 csv_file = "ML_Assignment_2.csv"
-X_train, X_test, y_train, y_test = data_load_preprocess(csv_file)
+X_train, X_test, y_train, y_test, scaler, target_encoder, feature_columns = data_load_preprocess(csv_file)
 
 print("Preparing data...")
+#print(f"Shape of Data set: train data input : {X_train}, train data output : {y_train}, test data input : {X_test}, test data output : {y_test}")
 #X_train, X_test, y_train, y_test, scaler, label_encoder = data_load_preprocess(
 #    df,
 #    TARGET_COLUMN
@@ -67,7 +73,7 @@ for model_name in MODEL_NAMES:
 
     # Save trained model
     model_file = os.path.join(
-        ARTIFACTS_DIR,
+        ARTIFACTS_DIR ,
         f"{model_name.replace(' ', '_').lower()}.pkl"
     )
 
@@ -83,10 +89,13 @@ for model_name in MODEL_NAMES:
 with open(os.path.join(ARTIFACTS_DIR, "scaler.pkl"), "wb") as f:
     pickle.dump(scaler, f)
 
-with open(os.path.join(ARTIFACTS_DIR, "label_encoder.pkl"), "wb") as f:
-    pickle.dump(label_encoder, f)
+with open(os.path.join(ARTIFACTS_DIR, "target_encoder.pkl"), "wb") as f:
+    pickle.dump(target_encoder, f)
 
 with open(os.path.join(ARTIFACTS_DIR, "metrics.pkl"), "wb") as f:
     pickle.dump(all_metrics, f)
+
+with open(os.path.join(ARTIFACTS_DIR, "feature_columns.pkl"), "wb") as f:
+    pickle.dump(feature_columns, f)
 
 print("\n✅ All models and artifacts saved successfully")

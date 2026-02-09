@@ -1,144 +1,226 @@
-# Importing Streamlit (used to create web UI)
-import streamlit as st    # Streamlit UI framework
+# ============================================================
+# Streamlit App for ML Assignment
+# ------------------------------------------------------------
+# This app:
+# 1. Loads dataset from GitHub
+# 2. Loads trained models (.pkl)
+# 3. Applies saved preprocessing (scaler, label encoder)
+# 4. Evaluates selected model
+# 5. Displays all required metrics
+# ============================================================
 
-# Import core libraries
+import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import pickle
+import os
 
-# Import sklearn utilities for evaluation
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-
-# Import our own helper functions
-from model.data_creation import data_load_preprocess
-from model.model_evaluation import evaluate_model
-from model.models_training import train_model
-
-
-# ------------------------------------------------------------
-# 🧠 3. MODEL SELECTION MAPPING
-# ------------------------------------------------------------
-# Maps dropdown option → corresponding training function
-
-MODEL_NAMES = [
-    "Logistic Regression",
-    "Decision Tree",
-    "KNN",
-    "Naive Bayes",
-    "Random Forest",
-    "XGBoost"
-]
-
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    matthews_corrcoef,
+    roc_auc_score
+)
 
 # ------------------------------------------------------------
-# 🖥️ 4. STREAMLIT PAGE HEADER
+# PAGE CONFIG
 # ------------------------------------------------------------
-
 st.set_page_config(
-    page_title="📊 Machine Learning Assignment – Classification Models",
-    layout="centered"
-)
-#st.title("📊 Machine Learning Assignment – Classification Models")
-
-st.markdown(
-    """
-    🔹 Upload a CSV dataset  
-    🔹 Select a machine learning model  
-    🔹 Evaluate performance using multiple metrics  
-    🔹 Visualize results using a confusion matrix  
-    """
+    page_title="ML Classification Models",
+    layout="wide"
 )
 
+st.title("📊 Machine Learning Classification Models")
+st.write("Assignment: Model Training, Evaluation & Deployment")
 
 # ------------------------------------------------------------
-# 📂 5. USER INPUT SECTION
+# CONFIGURATION
 # ------------------------------------------------------------
+DATA_URL = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/winequality-white.csv"
+TARGET_COLUMN = "Salary"
+PKL_DIR = "./model/pkl_files"
+csv_file = "./model/ML_Assignment_2.csv"
 
-# 📁 Dataset upload
-uploaded_file = st.file_uploader(
-    "📁 Upload CSV Dataset (Test Data Only)",
-    type=["csv"]
-)
-
-# 🎯 Target column name input
-target_column = st.text_input(
-    "🎯 Enter Target Column Name (exactly as in CSV)"
-)
-
-# 🤖 Model selection dropdown
-model_name = st.selectbox("Select Model", MODEL_NAMES)
-
+MODEL_FILES = {
+    "Logistic Regression": "logistic_regression.pkl",
+    "Decision Tree": "decision_tree.pkl",
+    "KNN": "knn.pkl",
+    "Naive Bayes": "naive_bayes.pkl",
+    "Random Forest": "random_forest.pkl",
+    "XGBoost": "xgboost.pkl",
+}
 
 # ------------------------------------------------------------
-# ▶️ 6. MAIN APPLICATION LOGIC
+# LOAD DATASET
 # ------------------------------------------------------------
+@st.cache_data
+def load_dataset():
+    df = pd.read_csv(csv_file)
+    return df
 
-# Proceed only if dataset and target column are provided
-if uploaded_file is not None and target_column != "":
+# ------------------------------------------------------------
+# LOAD PKL FILES
+# ------------------------------------------------------------
+def load_pickle(file_path):
+    with open(file_path, "rb") as f:
+        return pickle.load(f)
 
-    # --------------------------------------------------------
-    # 👀 Dataset Preview
-    # --------------------------------------------------------
-    df = pd.read_csv(uploaded_file)
+# ------------------------------------------------------------
+# MAIN APP
+# ------------------------------------------------------------
+try:
+    df = load_dataset()
+    st.success("✅ Dataset loaded successfully")
 
-    st.subheader("📄 Dataset Preview")
-    st.dataframe(df.head())
+    # Debug view (helps avoid column name issues)
+    with st.expander("🔍 View Dataset Columns"):
+        st.write(df.columns.tolist())
 
-    # --------------------------------------------------------
-    # ⚙️ Data Preprocessing
-    # --------------------------------------------------------
-    try:
-        X_train, X_test, y_train, y_test = load_and_preprocess(
-            uploaded_file,
-            target_column
+    if TARGET_COLUMN not in df.columns:
+        st.error(
+            f"❌ Target column '{TARGET_COLUMN}' not found in dataset."
         )
-    except Exception:
-        st.error("❌ Error during preprocessing. Please check target column name.")
         st.stop()
 
-    # --------------------------------------------------------
-    # 🏋️ Model Training
-    # --------------------------------------------------------
-    st.subheader("🏋️ Model Training")
+except Exception as e:
+    st.error(f"❌ Error loading dataset: {e}")
+    st.stop()
 
-    model = train_model(model_name, X_train, y_train)
+# ------------------------------------------------------------
+# MODEL SELECTION
+# ------------------------------------------------------------
+st.subheader("🔽 Select Model")
 
-    st.success(f"✅ {model_name} trained successfully!")
+model_name = st.selectbox(
+    "Choose a classification model:",
+    list(MODEL_FILES.keys())
+)
 
-    # --------------------------------------------------------
-    # 🔮 Model Prediction
-    # --------------------------------------------------------
-    y_pred = model.predict(X_test)
+# ------------------------------------------------------------
+# RUN EVALUATION
+# ------------------------------------------------------------
+if st.button("🚀 Evaluate Model"):
 
-    # Check for probability prediction (needed for AUC)
-    if hasattr(model, "predict_proba"):
-        y_prob = model.predict_proba(X_test)
-    else:
-        y_prob = None
+    try:
+        # Load artifacts
+        model = load_pickle(os.path.join(PKL_DIR, MODEL_FILES[model_name]))
+        scaler = load_pickle(os.path.join(PKL_DIR, "scaler.pkl"))
+        target_encoder = load_pickle(os.path.join(PKL_DIR, "target_encoder.pkl"))
+        feature_columns = load_pickle(os.path.join(PKL_DIR, "feature_columns.pkl"))
 
-    # --------------------------------------------------------
-    # 📊 Evaluation Metrics
-    # --------------------------------------------------------
-    st.subheader("📊 Evaluation Metrics")
+        #copying Data set content
+        df_eval = df.copy()
 
-    metrics = evaluate_model(y_test, y_pred, y_prob)
+        # 1️⃣ Replace invalid categorical values
+        for col in df_eval.columns:
+            if df_eval[col].dtype == "object":
+                mode_val = df_eval[col].replace(" ?", pd.NA).mode()[0]
+                df_eval[col] = df_eval[col].replace(" ?", mode_val)
 
-    # Display metrics clearly
-    for metric, value in metrics.items():
-        st.write(f"🔹 **{metric}:** {value}")
+        # 2️⃣ Label encode categorical columns (same as training)
+        categorical_cols = [
+            "WorkClass",
+            "marital-status",
+            "occupation",
+            "relationship",
+            "race",
+            "sex",
+            "native-country",
+            "education"
 
-    # --------------------------------------------------------
-    # 🔢 Confusion Matrix Visualization
-    # --------------------------------------------------------
-    st.subheader("🔢 Confusion Matrix")
+        ]
+        #for col in categorical_cols:
+            #df_eval[col] = label_encoder.transform(df_eval[col])
 
-    cm = confusion_matrix(y_test, y_pred)
+        # 3️⃣ Separate X and y
+        X = df_eval.drop(["Salary", "education-num"], axis=1)
 
-    fig, ax = plt.subplots()
-    ConfusionMatrixDisplay(cm).plot(ax=ax)
-    st.pyplot(fig)
+        st.write("Encoder type:", type(target_encoder))
+        y = target_encoder.transform(df_eval["Salary"])  
 
-else:
-    # --------------------------------------------------------
-    # ℹ️ User Guidance Message
-    # --------------------------------------------------------
-    st.info("⬆️ Please upload a CSV file and enter the target column name to continue.")
+        # 🚨 SAFETY FIX: force y to 1D if encoded incorrectly
+        if len(y.shape) > 1:
+            y = y.argmax(axis=1)
+
+        st.write("y shape:", y.shape)
+        st.write("y sample:", y[:10])  
+        
+        # 4️⃣ MinMax scale numerical columns (same list)
+        numerical_columns = [
+            "Age",
+            "fnlwgt",
+            "capital-gain",
+            "capital-loss",
+            "hours-per-week"
+        ]
+        
+        X[numerical_columns] = scaler.transform(X[numerical_columns])
+
+        # 5️⃣ One-hot encode categorical columns
+        X = pd.get_dummies(X,  columns=categorical_cols)
+
+        # 6️⃣ ALIGN COLUMNS WITH TRAINING
+        X = X.reindex(columns=feature_columns, fill_value=0)
+
+        # Debug view (helps avoid column name issues)
+        with st.expander("🔍 View train Dataset Columns"):
+            st.write(X.columns.tolist())
+
+        #st.subheader("Target column (y) - raw values")
+        #st.write(y)
+
+        y_pred = model.predict(X)
+
+        st.subheader("DEBUG: y inspection")
+        st.write("Type of y:", type(y))
+        st.write("y shape:", y.shape)
+    
+        # If y is numpy array, show first row
+        if hasattr(y, "ndim"):
+            st.write("y ndim:", y.ndim)
+            st.write("First 5 rows of y:", y[:5])
+
+        accuracy = accuracy_score(y, y_pred)
+        precision = precision_score(y, y_pred)
+        recall = recall_score(y, y_pred)
+        f1 = f1_score(y, y_pred)
+        mcc = matthews_corrcoef(y, y_pred)
+        
+        # Probabilities (for AUC)
+        #if hasattr(model, "predict_proba"):
+        #    y_prob = model.predict_proba(X)
+        #    auc = roc_auc_score(
+        #        y,
+        #        y_prob,
+        #        multi_class="ovr"
+        #    )
+        #else:
+        #    auc = "Not Supported"
+
+        # ----------------------------------------------------
+        # DISPLAY RESULTS
+        # ----------------------------------------------------
+        st.subheader(f"📈 Evaluation Metrics — {model_name}")
+
+        col1, col2, col3 = st.columns(3)
+
+        col1.metric("Accuracy", f"{accuracy:.4f}")
+        col1.metric("Precision", f"{precision:.4f}")
+
+        col2.metric("Recall", f"{recall:.4f}")
+        col2.metric("F1 Score", f"{f1:.4f}")
+
+        col3.metric("MCC Score", f"{mcc:.4f}")
+        #col3.metric("AUC Score", auc if isinstance(auc, str) else f"{auc:.4f}")
+
+        st.success("✅ Model evaluation completed successfully")
+
+    except FileNotFoundError:
+        st.error(
+            "❌ Model or preprocessing files not found. "
+            "Please ensure `.pkl` files exist in `pkl_files/`."
+        )
+
+    except Exception as e:
+        st.error(f"❌ Error during evaluation: {e}")
