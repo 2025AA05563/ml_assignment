@@ -26,12 +26,12 @@ The following six classification models were implemented and evaluated on the sa
 
 | ML Model Name | Accuracy | AUC | Precision | Recall | F1 Score | MCC |
 |--------------|----------|-----|-----------|--------|----------|-----|
-| Logistic Regression |  |  |  |  |  |  |
-| Decision Tree |  |  |  |  |  |  |
-| KNN |  |  |  |  |  |  |
-| Naive Bayes |  |  |  |  |  |  |
-| Random Forest (Ensemble) |  |  |  |  |  |  |
-| XGBoost (Ensemble) |  |  |  |  |  |  |
+| Logistic Regression |0.7992  |0.7920  |0.8171 |0.2136  | 0.3387 |0.3494  |
+| Decision Tree | 0.7935 |0.5789  |0.8780  |0.1652  |0.2780  |0.3246  |
+| KNN |0.7832  |0.7447  |0.5689  |0.4107  |0.4770  |0.3520  |
+| Naive Bayes |0.2407  |0.5  |0.2407  |1.00  |0.3881  |0.00  |
+| Random Forest (Ensemble) |0.7998  |0.7825  |0.9889  |0.1703  |0.2905  |0.3639  |
+| XGBoost (Ensemble) |0.8142  |0.8334  | 0.9761 |0.2341  |0.3776  |0.4257  |
 
 
 ## Observations on Model Performance
