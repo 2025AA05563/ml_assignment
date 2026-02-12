@@ -235,32 +235,32 @@ with metrics_container:
         #copying Data set content
         df_eval = df.copy()
 
-        # Debug view (helps avoid column name issues)
+        # to display features 
         with st.expander("🔍 View train Dataset Columns"):
             st.write(df.columns.tolist())
 
-        # Target column (Wine Quality example)
+        # Target column
         TARGET_COLUMN = "income"
 
-        # Remove whitespace
+        # To remove whitespace
         df_eval["income"] = df_eval["income"].str.strip()
 
-        # Remove trailing period (.)
+        # To remove trailing period (.) 
         df_eval["income"] = df_eval["income"].str.replace(".", "", regex=False)
 
-        # Load artifacts
+        # Load Pkl files
         model = load_pickle(os.path.join(PKL_DIR, MODEL_FILES[model_name]))
         scaler = load_pickle(os.path.join(PKL_DIR, "scaler.pkl"))
         target_encoder = load_pickle(os.path.join(PKL_DIR, "target_encoder.pkl"))
         feature_columns = load_pickle(os.path.join(PKL_DIR, "feature_columns.pkl"))
 
-        # 1️⃣ Replace invalid categorical values
+        # Replace invalid values with Mode
         for col in df_eval.columns:
             if df_eval[col].dtype == "object":
                 mode_val = df_eval[col].replace(" ?", pd.NA).mode()[0]
                 df_eval[col] = df_eval[col].replace(" ?", mode_val)
 
-        # 2️⃣ Label encode categorical columns (same as training)
+        # Label encoding for categorical columns (same as training)
         categorical_cols = [
             "workclass",
             "marital-status",
@@ -272,12 +272,12 @@ with metrics_container:
             "education"
         ]
 
-        # 3️⃣ Separate X and y
+        #  Separate Features (X) and Target (y)
         X = df_eval.drop(["income", "education-num"], axis=1)
         #st.write("Encoder type:", type(target_encoder))
         y = target_encoder.transform(df_eval["income"]) 
 
-        # 4️⃣ MinMax scale numerical columns (same list)
+        # MinMax scale normalization for numerical features
         numerical_columns = [
             "age",
             "fnlwgt",
@@ -287,13 +287,13 @@ with metrics_container:
         ]   
         X[numerical_columns] = scaler.transform(X[numerical_columns])
 
-        # 5️⃣ One-hot encode categorical columns
+        # One-hot encode categorical columns
         X = pd.get_dummies(X,  columns=categorical_cols)
 
-        # 6️⃣ ALIGN COLUMNS WITH TRAINING
+        # To make sure same as training for all columns
         X = X.reindex(columns=feature_columns, fill_value=0)
 
-
+        #splitting the training and test samples
         X_train, X_test, y_train, y_test = train_test_split(
             X,
             y,
@@ -302,24 +302,10 @@ with metrics_container:
             stratify=y
         )
 
-    # Model selection
-    #if model_name == "Logistic Regression":
-    #    model = LogisticRegression(max_iter=1000)
-    #elif model_name == "Decision Tree":
-    #    model = DecisionTreeClassifier()
-    #elif model_name == "KNN":
-    #    model = KNeighborsClassifier()
-    #elif model_name == "Naive Bayes":
-    #    model = GaussianNB()
-    #elif model_name == "Random Forest":
-    #    model = RandomForestClassifier()
-
-    #model.fit(X_train, y_train)
-
         y_pred = model.predict(X_test)
         y_prob = model.predict_proba(X_test)[:, 1] if hasattr(model, "predict_proba") else None
 
-        # Metrics
+        # All Metrics
         accuracy = accuracy_score(y_test, y_pred)
         precision = precision_score(y_test, y_pred)
         recall = recall_score(y_test, y_pred)
