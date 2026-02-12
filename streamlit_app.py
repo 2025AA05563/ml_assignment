@@ -166,6 +166,12 @@ with st.sidebar:
 # --------------------------------------------------
 # MAIN WINDOW — LAYOUT CONTAINERS (NO OVERLAP)
 # --------------------------------------------------
+if "data_loaded" not in st.session_state:
+    st.session_state.data_loaded = False
+
+if "evaluated" not in st.session_state:
+    st.session_state.evaluated = False
+
 download_container = st.container()
 data_container = st.container()
 metrics_container = st.container()
@@ -180,6 +186,7 @@ DATA_PATH = "dataset.csv"
 # DOWNLOAD DATASET
 # -------------------------
 with download_container:
+    st.subheader("⬇️ Dataset Download")
     if download_btn:
         try:
             response = requests.get(dataset_url)
@@ -193,7 +200,7 @@ with download_container:
 # -------------------------
 # LOAD DATASET
 # -------------------------
-with download_container:
+with data_container:
     if load_data_btn:
 
         if not os.path.exists(DATA_PATH):

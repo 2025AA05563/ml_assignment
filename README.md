@@ -7,18 +7,18 @@ The objective of this assignment is to implement, evaluate, and compare multiple
 - **Dataset Name:** Adult (Salary / Income prediction)
 - **Source:** UCI Machine Learning Repository
 - **Problem Type:** Binary Classification
-- **Number of Instances:** > 500
-- **Number of Features:** ≥ 12 (excluding target variable)
+- **Number of Instances:** 32561
+- **Number of Features:** 14 (excluding target variable)
 - **Target Variable:** income
 
-The dataset was preprocessed by handling label encoding (if required) and feature scaling using standardization to ensure fair comparison across models.
+The dataset was preprocessed by handling label encoding (if required) and feature scaling with Min-max standardization to ensure fair comparison across models.
 
 ## Models Used
 The following six classification models were implemented and evaluated on the same dataset
 - Logistic Regression
 - Decision Tree
 - K-Nearest Neighbor (KNN )
-- Naive Bayes (Gaussian or Multinomial)
+- Naive Bayes (Gaussian)
 - Random Forest
 - XGBoost
 
