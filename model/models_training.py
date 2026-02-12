@@ -13,10 +13,8 @@ def train_model(model_name, X_train, y_train):
     ----------
     model_name : str
         Name of the model selected by user
-    X_train : array-like
-        Training features
-    y_train : array-like
-        Training labels
+    X_train : array with Training features
+    y_train : array with Training target
 
     Returns:
     -------
@@ -27,7 +25,7 @@ def train_model(model_name, X_train, y_train):
     # Logistic Regression
     # --------------------------------------------------------
     if model_name == "Logistic Regression":
-        model = LogisticRegression(max_iter=1000)
+        model = LogisticRegression(max_iter=10000)
 
     # --------------------------------------------------------
     # Decision Tree Classifier
