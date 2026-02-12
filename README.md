@@ -38,12 +38,12 @@ The following six classification models were implemented and evaluated on the sa
 
 | ML Model Name | Observation |
 |--------------|-------------|
-| Logistic Regression | Performs well on linearly separable data but may underperform on complex patterns. |
-| Decision Tree | Captures non-linear relationships but is prone to overfitting. |
-| KNN | Sensitive to feature scaling and choice of k value. |
-| Naive Bayes | Computationally efficient but assumes feature independence. |
-| Random Forest (Ensemble) | Provides robust performance by reducing overfitting through ensemble learning. |
-| XGBoost (Ensemble) | Achieves the best overall per
+| Logistic Regression | Achieved overall good accuracy and AUC, which shows stable performance but Recall is very low which suggests model struggles to identify positive income cases. |
+| Decision Tree | Model is performed with high precision but poor recall and AUC, indicating that overfitting and weak generalization. Missing most positive cases |
+| KNN | Provided a more balanced precision–recall tradeoff compared to Logistic and Decision tree models. Moderate F1 and MCC indicate consistent but not optimal classification performance |
+| Naive Bayes | Extremely low precision, accuracy, and MCC indicate severe class imbalance bias and poor overall reliability. |
+| Random Forest (Ensemble) | Delivered very high precision and solid accuracy, confirming strong ensemble learning capability. |
+| XGBoost (Ensemble) | Achieved the best overall performance with highest accuracy, AUC, and MCC. Excellent precision with improved recall, making it the most reliable and well-balanced model.|
 
 ## Streamlit Web Application Features
 The deployed Streamlit application includes the following functionalities:
